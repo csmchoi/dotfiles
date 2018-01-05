@@ -1,7 +1,3 @@
-[user]
-  name = René Cienfuegos
-[github]
-  user = renechz
 [init]
   templatedir = ~/.git_template
 [push]
@@ -29,3 +25,7 @@
   autosquash = true
 [include]
   path = ~/.gitconfig.local
+[user]
+  name = René Cienfuegos
+[github]
+  user = renechz
