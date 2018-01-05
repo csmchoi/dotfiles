@@ -1,31 +1,51 @@
-HISTFILE="$HOME/.zsh_history"
-HISTSIZE=1000000
-SAVEHIST=1000000
+# load custom executable functions
+for function in ~/.zsh/functions/*; do
+  source $function
+done
 
-setopt hist_ignore_all_dups
+# extra files in ~/.zsh/configs/pre , ~/.zsh/configs , and ~/.zsh/configs/post
+# these are loaded first, second, and third, respectively.
+_load_settings() {
+  _dir="$1"
+  if [ -d "$_dir" ]; then
+    if [ -d "$_dir/pre" ]; then
+      for config in "$_dir"/pre/**/*(N-.); do
+        if [ ${config:e} = "zwc" ] ; then continue ; fi
+        . $config
+      done
+    fi
 
-export ZPLUG_HOME=/usr/local/opt/zplug
-source $ZPLUG_HOME/init.zsh
+    for config in "$_dir"/**/*(N-.); do
+      case "$config" in
+        "$_dir"/pre/*)
+          :
+          ;;
+        "$_dir"/post/*)
+          :
+          ;;
+        *)
+          if [[ -f $config && ${config:e} != "zwc" ]]; then
+            . $config
+          fi
+          ;;
+      esac
+    done
 
-zplug "zplug/zplug", hook-build:"zplug --self-manage"
-zplug "lib/completion", from:oh-my-zsh
-zplug "lib/history", from:oh-my-zsh
-zplug "plugins/heroku", from:oh-my-zsh
-zplug "zsh-users/zsh-autosuggestions", from:github
-zplug "zsh-users/zsh-completions", from:github
-zplug "zsh-users/zsh-history-substring-search", from:github
-
-zplug "mafredri/zsh-async", from:github
-zplug "sindresorhus/pure", use:pure.zsh, from:github, as:theme
-
-if ! zplug check --verbose; then
-  printf "Install zplug plugins? [y/N]: "
-  if read -q; then
-    echo; zplug install
+    if [ -d "$_dir/post" ]; then
+      for config in "$_dir"/post/**/*(N-.); do
+        if [ ${config:e} = "zwc" ] ; then continue ; fi
+        . $config
+      done
+    fi
   fi
-fi
+}
+_load_settings "$HOME/.zsh/configs"
 
-zplug load
+# Local config
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# aliases
+[[ -f ~/.aliases ]] && source ~/.aliases
 
 stty start undef
 stty stop undef
